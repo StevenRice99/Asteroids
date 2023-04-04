@@ -35,22 +35,22 @@ public class Player : Agent
     /// Cached shader value for use with line rendering.
     /// </summary>
     private static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
-    
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float positionAward = 10;
 
     [Min(float.Epsilon)]
     [SerializeField]
-    private float movePenalty = 0.1f;
+    private float moveCost = 0.25f;
 
     [Min(float.Epsilon)]
     [SerializeField]
-    private float turnPenalty = 0.01f;
+    private float turnCost = 0.1f;
 
     [Min(float.Epsilon)]
     [SerializeField]
-    private float shootPenalty = 1;
+    private float shootCost = 1;
+
+    [Min(float.Epsilon)]
+    [SerializeField]
+    private float asteroidScore = 10;
     
     [SerializeField]
     private Asteroid asteroidPrefab;
@@ -65,7 +65,7 @@ public class Player : Agent
     
     [Min(float.Epsilon)]
     [SerializeField]
-    private float spawnRate = 2;
+    private float spawnRate = 1;
     
     [Range(0f, 45f)]
     [SerializeField]
@@ -98,6 +98,29 @@ public class Player : Agent
     private bool _canShoot = true;
 
     private float _elapsedTime;
+
+    private Material _lineMaterial;
+
+    protected override void Awake()
+    {
+        // Unity has a built-in shader that is useful for drawing simple colored things.
+        _lineMaterial = new(Shader.Find("Hidden/Internal-Colored"))
+        {
+            hideFlags = HideFlags.HideAndDontSave
+        };
+            
+        // Turn on alpha blending.
+        _lineMaterial.SetInt(SrcBlend, (int)BlendMode.SrcAlpha);
+        _lineMaterial.SetInt(DstBlend, (int)BlendMode.OneMinusSrcAlpha);
+            
+        // Turn backface culling off.
+        _lineMaterial.SetInt(Cull, (int)CullMode.Off);
+            
+        // Turn off depth writes.
+        _lineMaterial.SetInt(ZWrite, 0);
+        
+        base.Awake();
+    }
 
     public override void OnEpisodeBegin()
     {
@@ -170,39 +193,36 @@ public class Player : Agent
             // Choose a random direction from the center of the spawner and
             // spawn the asteroid a distance away
             Vector2 spawnDirection = Random.insideUnitCircle.normalized;
-            Vector3 spawnPoint = spawnDirection * (levelSize +asteroidPadding);
 
             // Calculate a random variance in the asteroid's rotation which will
             // cause its trajectory to change
-            float variance = Random.Range(-trajectoryVariance, trajectoryVariance);
-            Quaternion rotation = Quaternion.AngleAxis(variance, Vector3.forward);
+            Quaternion rotation = Quaternion.AngleAxis(Random.Range(-trajectoryVariance, trajectoryVariance), Vector3.forward);
 
             // Create the new asteroid by cloning the prefab and set a random
             // size within the range
-            Asteroid asteroid = Instantiate(asteroidPrefab, spawnPoint, rotation);
+            Asteroid asteroid = Instantiate(asteroidPrefab, spawnDirection * (levelSize +asteroidPadding), rotation);
             asteroid.size = Random.Range(asteroid.minSize, asteroid.maxSize);
 
             // Set the trajectory to move in the direction of the spawner
-            Vector2 trajectory = rotation * -spawnDirection;
-            asteroid.SetTrajectory(trajectory);
+            asteroid.SetTrajectory(rotation * -spawnDirection);
 
             _elapsedTime = 0;
         }
         
-        AddReward(Mathf.Pow(Mathf.Max(0, levelSize - Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y))) / levelSize * positionAward, 2) * deltaTime);
+        AddReward(Mathf.Pow(Mathf.Max(0, levelSize - Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y))) / levelSize, 2) * deltaTime);
         
         RequestDecision();
         
         if (_move)
         {
             body.AddForce(t.up * moveSpeed);
-            AddReward(-movePenalty * deltaTime);
+            AddReward(-moveCost * deltaTime);
         }
         
         if (_turn != Turn.None)
         {
             body.AddTorque(turnSpeed * (_turn == Turn.Left ? 1 : -1));
-            AddReward(-turnPenalty * deltaTime);
+            AddReward(-turnCost * deltaTime);
         }
 
         if (!_canShoot || !_shoot)
@@ -210,7 +230,7 @@ public class Player : Agent
             return;
         }
         
-        AddReward(-shootPenalty);
+        AddReward(-shootCost);
         Bullet bullet = Instantiate(bulletPrefab, t.position, t.rotation);
         bullet.Project(t.up, this);
         
@@ -230,29 +250,13 @@ public class Player : Agent
         EndEpisode();
     }
 
-    private Material _lineMaterial;
+    public void DestroyedAsteroid()
+    {
+        AddReward(asteroidScore);
+    }
 
     private void OnRenderObject()
     {
-        if (_lineMaterial == null)
-        {
-            // Unity has a built-in shader that is useful for drawing simple colored things.
-            _lineMaterial = new(Shader.Find("Hidden/Internal-Colored"))
-            {
-                hideFlags = HideFlags.HideAndDontSave
-            };
-            
-            // Turn on alpha blending.
-            _lineMaterial.SetInt(SrcBlend, (int)BlendMode.SrcAlpha);
-            _lineMaterial.SetInt(DstBlend, (int)BlendMode.OneMinusSrcAlpha);
-            
-            // Turn backface culling off.
-            _lineMaterial.SetInt(Cull, (int)CullMode.Off);
-            
-            // Turn off depth writes.
-            _lineMaterial.SetInt(ZWrite, 0);
-        }
-
         _lineMaterial.SetPass(0);
 
         GL.PushMatrix();
@@ -261,21 +265,26 @@ public class Player : Agent
         
         GL.Color(Color.green);
 
-        Vector3 scale = transform.localScale;
+        Vector3 offset = transform.localScale / 2;
         
-        GL.Vertex(new(-levelSize - scale.x / 2, levelSize + scale.y / 2, 0));
-        GL.Vertex(new(levelSize + scale.x / 2, levelSize + scale.y / 2, 0));
+        GL.Vertex(new(-levelSize - offset.x, levelSize + offset.y, 0));
+        GL.Vertex(new(levelSize + offset.x, levelSize + offset.y, 0));
         
-        GL.Vertex(new(levelSize + scale.x / 2, levelSize + scale.y / 2, 0));
-        GL.Vertex(new(levelSize + scale.x / 2, -levelSize - scale.y / 2, 0));
+        GL.Vertex(new(levelSize + offset.x, levelSize + offset.y, 0));
+        GL.Vertex(new(levelSize + offset.x, -levelSize - offset.y, 0));
         
-        GL.Vertex(new(levelSize + scale.x / 2, -levelSize - scale.y / 2, 0));
-        GL.Vertex(new(-levelSize - scale.x / 2, -levelSize - scale.y / 2, 0));
+        GL.Vertex(new(levelSize + offset.x, -levelSize - offset.y, 0));
+        GL.Vertex(new(-levelSize - offset.x, -levelSize - offset.y, 0));
         
-        GL.Vertex(new(-levelSize - scale.x / 2, -levelSize - scale.y / 2, 0));
-        GL.Vertex(new(-levelSize - scale.x / 2, levelSize + scale.y / 2, 0));
+        GL.Vertex(new(-levelSize - offset.x, -levelSize - offset.y, 0));
+        GL.Vertex(new(-levelSize - offset.x, levelSize + offset.y, 0));
         
         GL.End();
         GL.PopMatrix();
+    }
+
+    private void OnGUI()
+    {
+        GUI.Label(new(Screen.width / 2 - 25, 10, 50, 20), $"{GetCumulativeReward()}");
     }
 }
