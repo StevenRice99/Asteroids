@@ -167,7 +167,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 6
+  orthographic size: 8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -350,10 +350,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  moveCost: 0.25
-  turnCost: 0.1
-  shootCost: 1
-  asteroidScore: 10
   asteroidPrefab: {fileID: 4394751245055917805, guid: 784457ffd007edb439542cee61bb2ca8,
     type: 3}
   levelSize: 5

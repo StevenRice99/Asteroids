@@ -35,22 +35,6 @@ public class Player : Agent
     /// Cached shader value for use with line rendering.
     /// </summary>
     private static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
-
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float moveCost = 0.25f;
-
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float turnCost = 0.1f;
-
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float shootCost = 1;
-
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float asteroidScore = 10;
     
     [SerializeField]
     private Asteroid asteroidPrefab;
@@ -209,20 +193,16 @@ public class Player : Agent
             _elapsedTime = 0;
         }
         
-        AddReward(Mathf.Pow(Mathf.Max(0, levelSize - Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y))) / levelSize, 2) * deltaTime);
-        
         RequestDecision();
         
         if (_move)
         {
             body.AddForce(t.up * moveSpeed);
-            AddReward(-moveCost * deltaTime);
         }
         
         if (_turn != Turn.None)
         {
             body.AddTorque(turnSpeed * (_turn == Turn.Left ? 1 : -1));
-            AddReward(-turnCost * deltaTime);
         }
 
         if (!_canShoot || !_shoot)
@@ -230,7 +210,6 @@ public class Player : Agent
             return;
         }
         
-        AddReward(-shootCost);
         Bullet bullet = Instantiate(bulletPrefab, t.position, t.rotation);
         bullet.Project(t.up, this);
         
@@ -252,7 +231,7 @@ public class Player : Agent
 
     public void DestroyedAsteroid()
     {
-        AddReward(asteroidScore);
+        AddReward(1);
     }
 
     private void OnRenderObject()
@@ -285,6 +264,8 @@ public class Player : Agent
 
     private void OnGUI()
     {
-        GUI.Label(new(Screen.width / 2 - 25, 10, 50, 20), $"{GetCumulativeReward()}");
+        GUIStyle style = GUI.skin.GetStyle("Label");
+        style.alignment = TextAnchor.UpperCenter;
+        GUI.Label(new(Screen.width / 2 - 25, 10, 50, 20), $"{(int) GetCumulativeReward()}", style);
     }
 }

@@ -148,4 +148,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   body: {fileID: 1516617292126257873}
   speed: 500
-  maxLifetime: 10
+  duration: 10
