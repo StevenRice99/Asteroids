@@ -212,6 +212,7 @@ GameObject:
   - component: {fileID: 526989102}
   - component: {fileID: 526989106}
   - component: {fileID: 526989107}
+  - component: {fileID: 526989108}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -362,7 +363,7 @@ MonoBehaviour:
   moveSpeed: 1
   turnSpeed: 0.1
   shootDelay: 0.2
-  autoAim: 1
+  reflexAgent: 1
   layerMask:
     serializedVersion: 2
     m_Bits: 8
@@ -390,13 +391,29 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 4f691abe0ff884048a1aef6d77ddd5a3, type: 3}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: Player
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
+--- !u!114 &526989108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526989101}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2902496c0120472b90269f94a0aec7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Record: 1
+  NumStepsToRecord: 100000
+  DemonstrationName: ReflexAgent
+  DemonstrationDirectory: 
 --- !u!1 &1796553098
 GameObject:
   m_ObjectHideFlags: 0

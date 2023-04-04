@@ -97,7 +97,7 @@ public class Player : Agent
 
     [Tooltip("Automatically aim and shoot at the nearest asteroid in heuristic mode.")]
     [SerializeField]
-    private bool autoAim = true;
+    private bool reflexAgent = true;
 
     [Tooltip("Layer mask for the auto aiming.")]
     [SerializeField]
@@ -208,7 +208,7 @@ public class Player : Agent
         Turn turn = Input.GetKey(KeyCode.A) ? Turn.Left : Input.GetKey(KeyCode.D) ? Turn.Right : Turn.None;
         
         // If no auto aiming or a manual move has been made.
-        if (!autoAim || turn != Turn.None)
+        if (!reflexAgent || turn != Turn.None)
         {
             // Apply the turn.
             discreteActions[1] = (int) turn;
@@ -272,19 +272,26 @@ public class Player : Agent
 
     private void FixedUpdate()
     {
+        // Clean up asteroids and bullets that have gone too far.
+        for (int i = 0; i < spawned.Count; i++)
+        {
+            Vector3 s = spawned[i].transform.position;
+            if (Mathf.Max(Mathf.Abs(s.x), Mathf.Abs(s.y)) <= size + padding)
+            {
+                continue;
+            }
+
+            Destroy(spawned[i].gameObject);
+            spawned.RemoveAt(i--);
+        }
+        
         Transform t = transform;
         Vector3 p = t.position;
 
-        // Check if out of bounds and end the level if so.
-        if (p.x <= -size || p.x >= size || p.y <= -size || p.y >= size)
-        {
-            EndEpisode();
-            return;
-        }
-        
-        float deltaTime = Time.fixedDeltaTime;
+        // Keep the player in bounds.
+        t.position = new(Mathf.Clamp(p.x, -size, size), Mathf.Clamp(p.y, -size, size), 0);
 
-        _elapsedTime += deltaTime;
+        _elapsedTime += Time.fixedDeltaTime;
         
         // If enough time has passed, spawn a new asteroid.
         if (_elapsedTime >= spawnRate)
@@ -323,14 +330,14 @@ public class Player : Agent
             body.AddTorque(turnSpeed * (_turn == Turn.Left ? 1 : -1));
         }
 
-        // If the playuer cannot shoot or the agent did not request to shoot, return.
+        // If the player cannot shoot or the agent did not request to shoot, return.
         if (!_canShoot || !_shoot)
         {
             return;
         }
         
         // Create a new bullet.
-        Bullet bullet = Instantiate(bulletPrefab, t.position, t.rotation);
+        Bullet bullet = Instantiate(bulletPrefab, p, t.rotation);
         bullet.Initialize(t.up, this);
         
         // Start the cooldown to shoot again.

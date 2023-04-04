@@ -10,12 +10,6 @@ public abstract class Spawnable : MonoBehaviour
     [SerializeField]
     private Rigidbody2D body;
     
-    [Header("Base Properties")]
-    [Tooltip("How many seconds to destroy after.")]
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float duration = 60;
-    
     [Tooltip("How much force to add.")]
     [Min(float.Epsilon)]
     [SerializeField]
@@ -39,9 +33,6 @@ public abstract class Spawnable : MonoBehaviour
         
         // Add force once since there is no drag.
         body.AddForce(direction * speed);
-
-        // Destroy after its max duration.
-        Destroy(gameObject, duration);
     }
 
     private void OnDestroy()
