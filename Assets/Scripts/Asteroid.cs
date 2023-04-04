@@ -5,13 +5,9 @@
 /// </summary>
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class Asteroid : MonoBehaviour
+public class Asteroid : Spawnable
 {
     [Header("Requirements")]
-    [Tooltip("The rigidbody for the asteroid.")]
-    [SerializeField]
-    private Rigidbody2D body;
-    
     [Tooltip("The sprite renderer to apply an option to.")]
     [SerializeField]
     private SpriteRenderer spriteRenderer;
@@ -23,16 +19,6 @@ public class Asteroid : MonoBehaviour
     [Header("Properties")]
     [Tooltip("The ranges for sizes of an asteroid.")]
     public Vector2 sizes = new(0.35f, 1.65f);
-    
-    [Tooltip("How much force to add to the asteroid.")]
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float speed = 50;
-    
-    [Tooltip("How many seconds to destroy the asteroid after.")]
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float duration = 60;
 
     [HideInInspector]
     public float size = 1;
@@ -44,19 +30,6 @@ public class Asteroid : MonoBehaviour
         Transform t = transform;
         t.eulerAngles = new(0f, 0f, Random.value * 360f);
         t.localScale = Vector3.one * size;
-
-        // Destroy after its max duration.
-        Destroy(gameObject, duration);
-    }
-
-    /// <summary>
-    /// Initialize the asteroid.
-    /// </summary>
-    /// <param name="direction">The direction to move in.</param>
-    public void Initialize(Vector2 direction)
-    {
-        // Add force once since there is no drag.
-        body.AddForce(direction * speed);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -83,7 +56,7 @@ public class Asteroid : MonoBehaviour
             half.size = size * 0.5f;
 
             // Start moving the new asteroid.
-            half.Initialize(Random.insideUnitCircle.normalized);
+            half.Initialize(Random.insideUnitCircle.normalized, player);
         }
     }
 }

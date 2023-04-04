@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -92,6 +94,19 @@ public class Player : Agent
     [Min(float.Epsilon)]
     [SerializeField]
     private float shootDelay = 0.2f;
+
+    [Tooltip("Automatically aim and shoot at the nearest asteroid in heuristic mode.")]
+    [SerializeField]
+    private bool autoAim = true;
+
+    [Tooltip("Layer mask for the auto aiming.")]
+    [SerializeField]
+    private LayerMask layerMask;
+
+    /// <summary>
+    /// All asteroids and bullets spawned.
+    /// </summary>
+    public readonly List<GameObject> spawned = new();
     
     /// <summary>
     /// If the agent should move this frame.
@@ -149,17 +164,13 @@ public class Player : Agent
     /// </summary>
     public override void OnEpisodeBegin()
     {
-        // Cleanup any remaining asteroids from past episodes.
-        foreach (Asteroid a in FindObjectsOfType<Asteroid>())
+        // Cleanup any remaining asteroids and bullets from past episodes.
+        foreach (GameObject s in spawned)
         {
-            Destroy(a.gameObject);
+            Destroy(s);
         }
-
-        // Cleanup any remaining bullets from past episodes.
-        foreach (Bullet b in FindObjectsOfType<Bullet>())
-        {
-            Destroy(b.gameObject);
-        }
+        
+        spawned.Clear();
 
         // Move back to the middle of the level.
         Transform t = transform;
@@ -194,10 +205,36 @@ public class Player : Agent
         discreteActions[0] = Input.GetKey(KeyCode.W) ? 1 : 0;
         
         // "A" to move left, "D" to move right, and neither to not turn.
-        discreteActions[1] = (int) (Input.GetKey(KeyCode.A) ? Turn.Left : Input.GetKey(KeyCode.D) ? Turn.Right : Turn.None);
+        Turn turn = Input.GetKey(KeyCode.A) ? Turn.Left : Input.GetKey(KeyCode.D) ? Turn.Right : Turn.None;
         
-        // Space to shoot, otherwise do not shoot.
-        discreteActions[2] = Input.GetKey(KeyCode.Space) ? 1 : 0;
+        // If no auto aiming or a manual move has been made.
+        if (!autoAim || turn != Turn.None)
+        {
+            // Apply the turn.
+            discreteActions[1] = (int) turn;
+            
+            // Space to shoot, otherwise do not shoot.
+            discreteActions[2] = Input.GetKey(KeyCode.Space) ? 1 : 0;
+            
+            return;
+        }
+
+        Transform t = transform;
+        Vector3 raw = t.position;
+        Vector2 p = new(raw.x, raw.y);
+
+        // Find the nearest asteroid to automatically aim at.
+        GameObject nearest = spawned.Where(s => s.CompareTag("Asteroid")).OrderBy(s =>
+        {
+            Vector3 position;
+            return Vector2.Distance(p, new((position = s.transform.position).x, position.y));
+        }).FirstOrDefault();
+        
+        // If there are no asteroids, do not turn, otherwise, turn towards the nearest.
+        discreteActions[1] = (int) (nearest == null ? Turn.None : Vector3.Cross((nearest.transform.position - raw).normalized, t.up).z < 0 ? Turn.Left : Turn.Right);
+        
+        // If currently aiming at an asteroid, shoot at it.
+        discreteActions[2] = Physics2D.Raycast(p, t.up, Mathf.Infinity, layerMask).transform == null ? 0 : 1;
     }
     
     /// <summary>
@@ -265,7 +302,7 @@ public class Player : Agent
             asteroid.size = Random.Range(asteroid.sizes.x, asteroid.sizes.y);
 
             // Move the asteroid towards the level.
-            asteroid.Initialize(rotation * -spawnDirection);
+            asteroid.Initialize(rotation * -spawnDirection, this);
 
             // Reset the timer.
             _elapsedTime = 0;
