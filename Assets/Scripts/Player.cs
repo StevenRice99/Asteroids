@@ -6,9 +6,16 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// The player which also controls the spawning of asteroids and bullets.
+/// </summary>
+[RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class Player : Agent
 {
+    /// <summary>
+    /// Options for turning the player.
+    /// </summary>
     private enum Turn
     {
         None,
@@ -36,53 +43,84 @@ public class Player : Agent
     /// </summary>
     private static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
     
+    [Header("Requirements")]
+    [Tooltip("Prefab for the asteroids.")]
     [SerializeField]
     private Asteroid asteroidPrefab;
-
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float levelSize = 5;
     
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float asteroidPadding = 15;
-    
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float spawnRate = 1;
-    
-    [Range(0f, 45f)]
-    [SerializeField]
-    private float trajectoryVariance = 15;
-    
+    [Tooltip("Prefab for the bullets.")]
     [SerializeField]
     private Bullet bulletPrefab;
     
+    [Tooltip("The rigidbody for the player.")]
     [SerializeField]
     private Rigidbody2D body;
 
+    [Header("Level")]
+    [Tooltip("The size of the level.")]
+    [Min(float.Epsilon)]
+    [SerializeField]
+    private float size = 5;
+    
+    [Tooltip("How much outside of the level to spawn the asteroids.")]
+    [Min(float.Epsilon)]
+    [SerializeField]
+    private float padding = 15;
+    
+    [Tooltip("The max angle asteroids can spawn offset of the level origin.")]
+    [Range(0f, 45f)]
+    [SerializeField]
+    private float angle = 15;
+    
+    [Tooltip("How many seconds to wait before spawning an asteroid.")]
+    [Min(float.Epsilon)]
+    [SerializeField]
+    private float spawnRate = 1;
+
+    [Header("Controls")]
+    [Tooltip("How fast to move the player.")]
     [Min(float.Epsilon)]
     [SerializeField]
     private float moveSpeed = 1;
     
+    [Tooltip("How fast to turn the player.")]
     [Min(float.Epsilon)]
     [SerializeField]
     private float turnSpeed = 0.1f;
 
+    [Tooltip("Delay before being able to shoot another bullet.")]
     [Min(float.Epsilon)]
     [SerializeField]
     private float shootDelay = 0.2f;
     
+    /// <summary>
+    /// If the agent should move this frame.
+    /// </summary>
     private bool _move;
 
+    /// <summary>
+    /// Which way the agent should turn this frame.
+    /// </summary>
     private Turn _turn;
 
+    /// <summary>
+    /// If the agent should shoot this frame.
+    /// </summary>
     private bool _shoot;
 
+    /// <summary>
+    /// If the agent can shoot.
+    /// </summary>
     private bool _canShoot = true;
 
+    /// <summary>
+    /// How much time has past since the last asteroid was spawned.
+    /// </summary>
     private float _elapsedTime;
 
+    /// <summary>
+    /// Material for rendering the outline of the level.
+    /// </summary>
     private Material _lineMaterial;
 
     protected override void Awake()
@@ -106,27 +144,36 @@ public class Player : Agent
         base.Awake();
     }
 
+    /// <summary>
+    /// Implement OnEpisodeBegin() to set up an Agent instance at the beginning of an episode.
+    /// </summary>
     public override void OnEpisodeBegin()
     {
+        // Cleanup any remaining asteroids from past episodes.
         foreach (Asteroid a in FindObjectsOfType<Asteroid>())
         {
             Destroy(a.gameObject);
         }
 
+        // Cleanup any remaining bullets from past episodes.
         foreach (Bullet b in FindObjectsOfType<Bullet>())
         {
             Destroy(b.gameObject);
         }
 
+        // Move back to the middle of the level.
         Transform t = transform;
         t.position = Vector3.zero;
         t.rotation = Quaternion.identity;
         
+        // Reset any velocity.
         body.velocity = Vector2.zero;
         body.angularVelocity = 0f;
 
+        // Reset that any time has passed.
         _elapsedTime = 0;
 
+        // Reset all inputs.
         _move = false;
         _turn = Turn.None;
         _shoot = false;
@@ -134,26 +181,55 @@ public class Player : Agent
         StopAllCoroutines();
     }
 
+    /// <summary>
+    /// Implement Heuristic(ActionBuffers) to choose an action for this agent using a custom heuristic.
+    /// </summary>
+    /// <param name="actionsOut">The ActionBuffers which contain the continuous and discrete action buffers to write to.</param>
     public override void Heuristic(in ActionBuffers actionsOut)
     {
+        // Implement keyboard controls.
         ActionSegment<int> discreteActions = actionsOut.DiscreteActions;
+        
+        // "W" to move forward, otherwise don't move.
         discreteActions[0] = Input.GetKey(KeyCode.W) ? 1 : 0;
+        
+        // "A" to move left, "D" to move right, and neither to not turn.
         discreteActions[1] = (int) (Input.GetKey(KeyCode.A) ? Turn.Left : Input.GetKey(KeyCode.D) ? Turn.Right : Turn.None);
+        
+        // Space to shoot, otherwise do not shoot.
         discreteActions[2] = Input.GetKey(KeyCode.Space) ? 1 : 0;
     }
     
+    /// <summary>
+    /// Implement CollectObservations() to collect the vector observations of the agent for the step.
+    /// The agent observation describes the current environment from the perspective of the agent.
+    /// </summary>
+    /// <param name="sensor">The vector observations for the agent.</param>
     public override void CollectObservations(VectorSensor sensor)
     {
+        // Add the position relative to the level boundaries.
+        // Position is scaled between zero and one for both X and Y values.
         Vector3 p = transform.localPosition;
-        sensor.AddObservation((p.x / levelSize + 1) / 2);
-        sensor.AddObservation((p.y / levelSize + 1) / 2);
+        sensor.AddObservation((p.x / size + 1) / 2);
+        sensor.AddObservation((p.y / size + 1) / 2);
+        
+        // Add the rotation scaled between zero and one.
         sensor.AddObservation(transform.localEulerAngles.z / 360);
     }
 
+    /// <summary>
+    /// Implement OnActionReceived() to specify agent behavior at every step, based on the provided action.
+    /// </summary>
+    /// <param name="actions">Struct containing the buffers of actions to be executed at this step.</param>
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // Set if should move.
         _move = actions.DiscreteActions[0] > 0;
+        
+        // Cast the result to a turn value.
         _turn = (Turn) actions.DiscreteActions[1];
+        
+        // Set if should try to shoot.
         _shoot = actions.DiscreteActions[2] > 0;
     }
 
@@ -162,7 +238,8 @@ public class Player : Agent
         Transform t = transform;
         Vector3 p = t.position;
 
-        if (p.x <= -levelSize || p.x >= levelSize || p.y <= -levelSize || p.y >= levelSize)
+        // Check if out of bounds and end the level if so.
+        if (p.x <= -size || p.x >= size || p.y <= -size || p.y >= size)
         {
             EndEpisode();
             return;
@@ -172,50 +249,58 @@ public class Player : Agent
 
         _elapsedTime += deltaTime;
         
+        // If enough time has passed, spawn a new asteroid.
         if (_elapsedTime >= spawnRate)
         {
-            // Choose a random direction from the center of the spawner and
-            // spawn the asteroid a distance away
+            // Choose a random direction from the center of the level.
             Vector2 spawnDirection = Random.insideUnitCircle.normalized;
 
-            // Calculate a random variance in the asteroid's rotation which will
-            // cause its trajectory to change
-            Quaternion rotation = Quaternion.AngleAxis(Random.Range(-trajectoryVariance, trajectoryVariance), Vector3.forward);
+            // Give the direction a random offset so it is not guaranteed to be aimed at the exact middle.
+            Quaternion rotation = Quaternion.AngleAxis(Random.Range(-angle, angle), Vector3.forward);
 
-            // Create the new asteroid by cloning the prefab and set a random
-            // size within the range
-            Asteroid asteroid = Instantiate(asteroidPrefab, spawnDirection * (levelSize +asteroidPadding), rotation);
-            asteroid.size = Random.Range(asteroid.minSize, asteroid.maxSize);
+            // Create a new asteroid at the spawn distance with the given rotation.
+            Asteroid asteroid = Instantiate(asteroidPrefab, spawnDirection * (size + padding), rotation);
+            
+            // Give the asteroid a random size.
+            asteroid.size = Random.Range(asteroid.sizes.x, asteroid.sizes.y);
 
-            // Set the trajectory to move in the direction of the spawner
-            asteroid.SetTrajectory(rotation * -spawnDirection);
+            // Move the asteroid towards the level.
+            asteroid.Initialize(rotation * -spawnDirection);
 
+            // Reset the timer.
             _elapsedTime = 0;
         }
         
+        // Get a decision from the player, being either the heuristic, results from PyTorch, or finished model inference.
         RequestDecision();
         
+        // Move if set to.
         if (_move)
         {
             body.AddForce(t.up * moveSpeed);
         }
         
+        // If should be turning, do so.
         if (_turn != Turn.None)
         {
             body.AddTorque(turnSpeed * (_turn == Turn.Left ? 1 : -1));
         }
 
+        // If the playuer cannot shoot or the agent did not request to shoot, return.
         if (!_canShoot || !_shoot)
         {
             return;
         }
         
+        // Create a new bullet.
         Bullet bullet = Instantiate(bulletPrefab, t.position, t.rotation);
-        bullet.Project(t.up, this);
+        bullet.Initialize(t.up, this);
         
+        // Start the cooldown to shoot again.
         StopAllCoroutines();
         StartCoroutine(ShootCooldown());
         
+        // Delay to shoot again.
         IEnumerator ShootCooldown()
         {
             _canShoot = false;
@@ -226,44 +311,57 @@ public class Player : Agent
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // End the episode if an asteroid is hit.
         EndEpisode();
     }
 
+    /// <summary>
+    /// If an asteroid was destroyed, increase the score.
+    /// </summary>
     public void DestroyedAsteroid()
     {
+        // Simply add one score for every asteroid.
         AddReward(1);
     }
 
     private void OnRenderObject()
     {
+        // Setup to render borders.
         _lineMaterial.SetPass(0);
-
         GL.PushMatrix();
         GL.MultMatrix(Matrix4x4.identity);
         GL.Begin(GL.LINES);
         
+        // Make borders green.
         GL.Color(Color.green);
 
+        // Add padding offset for the width of the player.
         Vector3 offset = transform.localScale / 2;
         
-        GL.Vertex(new(-levelSize - offset.x, levelSize + offset.y, 0));
-        GL.Vertex(new(levelSize + offset.x, levelSize + offset.y, 0));
+        // Top.
+        GL.Vertex(new(-size - offset.x, size + offset.y, 0));
+        GL.Vertex(new(size + offset.x, size + offset.y, 0));
         
-        GL.Vertex(new(levelSize + offset.x, levelSize + offset.y, 0));
-        GL.Vertex(new(levelSize + offset.x, -levelSize - offset.y, 0));
+        // Right.
+        GL.Vertex(new(size + offset.x, size + offset.y, 0));
+        GL.Vertex(new(size + offset.x, -size - offset.y, 0));
         
-        GL.Vertex(new(levelSize + offset.x, -levelSize - offset.y, 0));
-        GL.Vertex(new(-levelSize - offset.x, -levelSize - offset.y, 0));
+        // Bottom.
+        GL.Vertex(new(size + offset.x, -size - offset.y, 0));
+        GL.Vertex(new(-size - offset.x, -size - offset.y, 0));
         
-        GL.Vertex(new(-levelSize - offset.x, -levelSize - offset.y, 0));
-        GL.Vertex(new(-levelSize - offset.x, levelSize + offset.y, 0));
+        // Left.
+        GL.Vertex(new(-size - offset.x, -size - offset.y, 0));
+        GL.Vertex(new(-size - offset.x, size + offset.y, 0));
         
+        // Finish rendering.
         GL.End();
         GL.PopMatrix();
     }
 
     private void OnGUI()
     {
+        // Display the score at the top of the screen.
         GUIStyle style = GUI.skin.GetStyle("Label");
         style.alignment = TextAnchor.UpperCenter;
         GUI.Label(new(Screen.width / 2 - 25, 10, 50, 20), $"{(int) GetCumulativeReward()}", style);

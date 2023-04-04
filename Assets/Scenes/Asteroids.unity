@@ -352,13 +352,13 @@ MonoBehaviour:
   MaxStep: 0
   asteroidPrefab: {fileID: 4394751245055917805, guid: 784457ffd007edb439542cee61bb2ca8,
     type: 3}
-  levelSize: 5
-  asteroidPadding: 15
-  spawnRate: 1
-  trajectoryVariance: 15
   bulletPrefab: {fileID: 2758569942672203454, guid: d8d55dfacb762f64cbf4c05cc402a4de,
     type: 3}
   body: {fileID: 526989103}
+  size: 5
+  padding: 15
+  angle: 15
+  spawnRate: 1
   moveSpeed: 1
   turnSpeed: 0.1
   shootDelay: 0.2
