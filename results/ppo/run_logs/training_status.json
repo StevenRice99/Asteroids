@@ -2,31 +2,31 @@
     "Player": {
         "checkpoints": [
             {
-                "steps": 499995,
-                "file_path": "results\\ppo\\Player\\Player-499995.onnx",
-                "reward": 9.660673123629143,
-                "creation_time": 1680552956.917127,
+                "steps": 499940,
+                "file_path": "results\\ppo\\Player\\Player-499940.onnx",
+                "reward": 2695.134599606196,
+                "creation_time": 1680567206.825224,
                 "auxillary_file_paths": [
-                    "results\\ppo\\Player\\Player-499995.pt"
+                    "results\\ppo\\Player\\Player-499940.pt"
                 ]
             },
             {
-                "steps": 500059,
-                "file_path": "results\\ppo\\Player\\Player-500059.onnx",
-                "reward": 9.660673123629143,
-                "creation_time": 1680552956.9916003,
+                "steps": 500004,
+                "file_path": "results\\ppo\\Player\\Player-500004.onnx",
+                "reward": 2695.134599606196,
+                "creation_time": 1680567206.9112363,
                 "auxillary_file_paths": [
-                    "results\\ppo\\Player\\Player-500059.pt"
+                    "results\\ppo\\Player\\Player-500004.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 500059,
+            "steps": 500004,
             "file_path": "results\\ppo\\Player.onnx",
-            "reward": 9.660673123629143,
-            "creation_time": 1680552956.9916003,
+            "reward": 2695.134599606196,
+            "creation_time": 1680567206.9112363,
             "auxillary_file_paths": [
-                "results\\ppo\\Player\\Player-500059.pt"
+                "results\\ppo\\Player\\Player-500004.pt"
             ]
         }
     },

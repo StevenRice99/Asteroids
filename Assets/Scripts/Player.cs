@@ -38,11 +38,7 @@ public class Player : Agent
     
     [Min(float.Epsilon)]
     [SerializeField]
-    private float asteroidScore = 2;
-    
-    [Min(float.Epsilon)]
-    [SerializeField]
-    private float positionAward = 1;
+    private float positionAward = 10;
 
     [Min(float.Epsilon)]
     [SerializeField]
@@ -65,7 +61,7 @@ public class Player : Agent
     
     [Min(float.Epsilon)]
     [SerializeField]
-    private float spawnPadding = 5;
+    private float asteroidPadding = 15;
     
     [Min(float.Epsilon)]
     [SerializeField]
@@ -123,6 +119,12 @@ public class Player : Agent
         body.angularVelocity = 0f;
 
         _elapsedTime = 0;
+
+        _move = false;
+        _turn = Turn.None;
+        _shoot = false;
+        _canShoot = true;
+        StopAllCoroutines();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -168,7 +170,7 @@ public class Player : Agent
             // Choose a random direction from the center of the spawner and
             // spawn the asteroid a distance away
             Vector2 spawnDirection = Random.insideUnitCircle.normalized;
-            Vector3 spawnPoint = spawnDirection * (levelSize +spawnPadding);
+            Vector3 spawnPoint = spawnDirection * (levelSize +asteroidPadding);
 
             // Calculate a random variance in the asteroid's rotation which will
             // cause its trajectory to change
@@ -186,8 +188,8 @@ public class Player : Agent
 
             _elapsedTime = 0;
         }
-
-        AddReward(Mathf.Max(0, levelSize - Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y))) / levelSize * positionAward * deltaTime);
+        
+        AddReward(Mathf.Pow(Mathf.Max(0, levelSize - Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y))) / levelSize * positionAward, 2) * deltaTime);
         
         RequestDecision();
         
@@ -196,6 +198,7 @@ public class Player : Agent
             body.AddForce(t.up * moveSpeed);
             AddReward(-movePenalty * deltaTime);
         }
+        
         if (_turn != Turn.None)
         {
             body.AddTorque(turnSpeed * (_turn == Turn.Left ? 1 : -1));
@@ -220,11 +223,6 @@ public class Player : Agent
             yield return new WaitForSeconds(shootDelay);
             _canShoot = true;
         }
-    }
-
-    public void DestroyedAsteroid()
-    {
-        AddReward(asteroidScore);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
@@ -24,33 +25,29 @@ public class Asteroid : MonoBehaviour
     
     [Min(float.Epsilon)]
     [SerializeField]
-    private float movementSpeed = 50;
+    private float speed = 50;
     
     [Min(float.Epsilon)]
     [SerializeField]
-    private float maxLifetime = 30;
+    private float duration = 60;
 
     private void Start()
     {
         // Assign random properties to make each asteroid feel unique
         spriteRenderer.sprite = sprites[Random.Range(0, sprites.Length)];
         Transform t = transform;
-        t.eulerAngles = new Vector3(0f, 0f, Random.value * 360f);
-
-        // Set the scale and mass of the asteroid based on the assigned size so
-        // the physics is more realistic
+        t.eulerAngles = new(0f, 0f, Random.value * 360f);
         t.localScale = Vector3.one * size;
-        body.mass = size;
 
         // Destroy the asteroid after it reaches its max lifetime
-        Destroy(gameObject, maxLifetime);
+        Destroy(gameObject, duration);
     }
 
     public void SetTrajectory(Vector2 direction)
     {
         // The asteroid only needs a force to be added once since they have no
         // drag to make them stop moving
-        body.AddForce(direction * movementSpeed);
+        body.AddForce(direction * speed);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

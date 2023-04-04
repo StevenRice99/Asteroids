@@ -350,15 +350,14 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  asteroidScore: 2
-  positionAward: 1
-  movePenalty: 0.01
+  positionAward: 10
+  movePenalty: 0.1
   turnPenalty: 0.01
   shootPenalty: 1
   asteroidPrefab: {fileID: 4394751245055917805, guid: 784457ffd007edb439542cee61bb2ca8,
     type: 3}
   levelSize: 5
-  spawnPadding: 5
+  asteroidPadding: 15
   spawnRate: 2
   trajectoryVariance: 15
   bulletPrefab: {fileID: 2758569942672203454, guid: d8d55dfacb762f64cbf4c05cc402a4de,
@@ -381,7 +380,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_BrainParameters:
     VectorObservationSize: 3
-    NumStackedVectorObservations: 1
+    NumStackedVectorObservations: 2
     m_ActionSpec:
       m_NumContinuousActions: 0
       BranchSizes: 020000000300000002000000
@@ -444,14 +443,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SensorName: Rays
   m_DetectableTags: []
-  m_RaysPerDirection: 10
+  m_RaysPerDirection: 30
   m_MaxRayDegrees: 180
-  m_SphereCastRadius: 2
+  m_SphereCastRadius: 0.1
   m_RayLength: 30
   m_RayLayerMask:
     serializedVersion: 2
     m_Bits: 4294962312
   m_ObservationStacks: 1
-  m_AlternatingRayOrder: 1
+  m_AlternatingRayOrder: 0
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
   rayMissColor: {r: 1, g: 1, b: 1, a: 1}

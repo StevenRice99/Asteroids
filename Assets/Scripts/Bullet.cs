@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Bullet : MonoBehaviour
@@ -12,7 +13,7 @@ public class Bullet : MonoBehaviour
     
     [Min(float.Epsilon)]
     [SerializeField]
-    private float maxLifetime = 10;
+    private float duration = 10;
 
     private Player _player;
 
@@ -25,12 +26,11 @@ public class Bullet : MonoBehaviour
         body.AddForce(direction * speed);
 
         // Destroy the bullet after it reaches it max lifetime
-        Destroy(gameObject, maxLifetime);
+        Destroy(gameObject, duration);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        _player.DestroyedAsteroid();
         Destroy(gameObject);
     }
 }
