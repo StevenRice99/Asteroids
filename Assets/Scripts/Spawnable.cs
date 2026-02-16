@@ -29,7 +29,7 @@ public abstract class Spawnable : MonoBehaviour
     {
         // Keep a reference to the player.
         player = p;
-        player.spawned.Add(gameObject);
+        player.Spawned.Add(gameObject);
         
         // Add force once since there is no drag.
         body.AddForce(direction * speed);
@@ -38,6 +38,6 @@ public abstract class Spawnable : MonoBehaviour
     private void OnDestroy()
     {
         // Clean up the reference.
-        player.spawned.Remove(gameObject);
+        player.Spawned.Remove(gameObject);
     }
 }
