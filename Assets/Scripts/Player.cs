@@ -1,8 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Unity.InferenceEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Demonstrations;
+using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,6 +18,7 @@ using Random = UnityEngine.Random;
 /// </summary>
 [SelectionBase]
 [DisallowMultipleComponent]
+[RequireComponent(typeof(BehaviorParameters))]
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class Player : Agent
@@ -47,6 +52,13 @@ public class Player : Agent
     /// Cached shader value for use with line rendering.
     /// </summary>
     private readonly int _zWrite = Shader.PropertyToID("_ZWrite");
+    
+    /// <summary>
+    /// All trained models.
+    /// </summary>
+    [Tooltip("All trained models.")]
+    [SerializeField]
+    private ModelAsset[] models;
     
     /// <summary>
     /// Prefab for the asteroids.
@@ -179,6 +191,11 @@ public class Player : Agent
     private Material _lineMaterial;
     
     /// <summary>
+    /// The parameters for this agent.
+    /// </summary>
+    private BehaviorParameters _parameters;
+    
+    /// <summary>
     /// Implement OnEpisodeBegin() to set up an Agent instance at the beginning of an episode.
     /// </summary>
     public override void OnEpisodeBegin()
@@ -309,6 +326,26 @@ public class Player : Agent
         // Turn off depth writes.
         _lineMaterial.SetInt(_zWrite, 0);
         
+        // Get the parameters.
+        _parameters = GetComponent<BehaviorParameters>();
+        
+        // If there is a demonstration recorder, set it outside of the assets folder.
+        DemonstrationRecorder recorder = GetComponent<DemonstrationRecorder>();
+        if (recorder)
+        {
+            string path = Path.GetDirectoryName(Application.dataPath);
+            if (path != null)
+            {
+                path = Path.Combine(path, "Demonstrations");
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                
+                recorder.DemonstrationDirectory = path;
+            }
+        }
+        
         base.Awake();
     }
     
@@ -382,6 +419,9 @@ public class Player : Agent
             return;
         }
         
+        // Give a slight penalty for firing to ensure the agent learns to not just spam fire.
+        AddReward(-0.1f);
+        
         // Create a new bullet.
         Bullet bullet = Instantiate(bulletPrefab, p, t.rotation);
         bullet.name = "Bullet";
@@ -407,7 +447,8 @@ public class Player : Agent
     /// <param name="_">The Collision2D data associated with this collision.</param>
     private void OnCollisionEnter2D(Collision2D _)
     {
-        // End the episode if an asteroid is hit.
+        // End the episode if an asteroid is hit and give a penalty.
+        AddReward(-1f);
         EndEpisode();
     }
     
@@ -417,7 +458,7 @@ public class Player : Agent
     public void DestroyedAsteroid()
     {
         // Simply add one score for every asteroid.
-        AddReward(1);
+        AddReward(1f);
     }
     
     /// <summary>
@@ -463,7 +504,74 @@ public class Player : Agent
     /// </summary>
     private void OnGUI()
     {
+        const float x = 10;
+        const float w = 175;
+        const float h = 25;
+        
         // Display the score in the top left.
-        GUI.Label(new(10, 10, Screen.width - 10, Screen.width - 10), $"Score = {(int) GetCumulativeReward()}");
+        GUI.Label(new(x, x, w, h), $"Score = {GetCumulativeReward()}");
+        
+        if (models.Length < 1 || (Academy.IsInitialized && Academy.Instance.IsCommunicatorOn))
+        {
+            return;
+        }
+        
+        float xr = Screen.width - x - w;
+        float y = x;
+        
+        // Handle based on if we are currently using a model or not.
+        bool heuristic = _parameters.IsInHeuristicMode();
+        if (heuristic)
+        {
+            // Indicate we are in heuristic mode.
+            GUI.Label(new(xr, y, w, h), "Heuristic");
+            y += h + x;
+            
+            // Give options to switch to all the other models.
+            foreach (ModelAsset model in models)
+            {
+                if (GUI.Button(new(xr, y, w, h), model.name))
+                {
+                    _parameters.Model = model;
+                    _parameters.BehaviorType = BehaviorType.InferenceOnly;
+                }
+                
+                y += h + x;
+            }
+        }
+        else
+        {
+            // Display the name of the current model.
+            ModelAsset model = _parameters.Model;
+            if (model != null)
+            {
+                GUI.Label(new(xr, y, w, h), model.name);
+                y += h + x;
+            }
+            
+            // Display all other models which can be switched to.
+            foreach (ModelAsset other in models)
+            {
+                if (model == other)
+                {
+                    continue;
+                }
+                
+                if (GUI.Button(new(xr, y, w, h), other.name))
+                {
+                    _parameters.Model = other;
+                    _parameters.BehaviorType = BehaviorType.InferenceOnly;
+                }
+                
+                y += h + x;
+            }
+            
+            // Display the option to switch to heuristic mode.
+            if (GUI.Button(new(xr, y, w, h), "Heuristic"))
+            {
+                _parameters.Model = null;
+                _parameters.BehaviorType = BehaviorType.HeuristicOnly;
+            }
+        }
     }
 }
