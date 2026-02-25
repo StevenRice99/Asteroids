@@ -220,7 +220,7 @@ public class Player : Agent
         StopAllCoroutines();
     }
     
-    /// <summary>
+/// <summary>
     /// Implement Heuristic(ActionBuffers) to choose an action for this agent using a custom heuristic.
     /// </summary>
     /// <param name="actionsOut">The ActionBuffers which contain the continuous and discrete action buffers to write to.</param>
@@ -253,12 +253,45 @@ public class Player : Agent
         Vector3 raw = t.position;
         Vector2 p = new(raw.x, raw.y);
         
-        // Find the nearest asteroid to automatically aim at.
-        GameObject nearest = Spawned.Where(s => s.CompareTag("Asteroid")).OrderBy(s =>
-        {
-            Vector3 position = s.transform.position;
-            return Vector2.Distance(p, new(position.x, position.y));
-        }).FirstOrDefault();
+        // Calculate the circumscribed circle radius for the player's box collider.
+        BoxCollider2D playerCol = GetComponent<BoxCollider2D>();
+        float playerRadius = playerCol != null ? playerCol.bounds.extents.magnitude : t.localScale.x / 2f;
+        
+        // Find the nearest asteroid, prioritizing those on a collision course.
+        GameObject nearest = Spawned
+            .Where(s => s.CompareTag("Asteroid"))
+            .Select(s =>
+            {
+                Vector2 aPos = s.transform.position;
+                Vector2 aVel = s.GetComponent<Rigidbody2D>().linearVelocity;
+                Vector2 toPlayer = p - aPos;
+                
+                float distanceToPlayer = toPlayer.magnitude;
+                
+                // Determine if the asteroid is moving towards the player.
+                float dot = Vector2.Dot(toPlayer, aVel);
+                bool movingTowards = dot > 0;
+                
+                // Calculate the shortest distance from the player to the asteroid's trajectory line.
+                float distanceToTrajectory = float.MaxValue;
+                if (movingTowards && aVel.sqrMagnitude > 0.001f)
+                {
+                    distanceToTrajectory = Mathf.Abs(toPlayer.x * aVel.y - toPlayer.y * aVel.x) / aVel.magnitude;
+                }
+                
+                // Calculate the circumscribed circle radius for the asteroid's box collider.
+                BoxCollider2D asteroidCol = s.GetComponent<BoxCollider2D>();
+                float asteroidRadius = asteroidCol != null ? asteroidCol.bounds.extents.magnitude : s.transform.localScale.x / 2f;
+                
+                // Flag as threat if it's moving towards us AND the trajectory intersects our combined bounding radii.
+                bool isThreat = movingTowards && distanceToTrajectory < (playerRadius + asteroidRadius);
+                return new { GameObject = s, IsThreat = isThreat, Distance = distanceToPlayer };
+            })
+            // Order by True (threats) first, then sort by distance
+            .OrderByDescending(x => x.IsThreat) 
+            .ThenBy(x => x.Distance)
+            .Select(x => x.GameObject)
+            .FirstOrDefault();
         
         // Nothing to do if no aiming target.
         if (nearest == null)
@@ -614,11 +647,13 @@ public class Player : Agent
             }
             
             // Display the option to switch to heuristic mode.
-            if (GUI.Button(new(xr, y, w, h), "Heuristic"))
+            if (!GUI.Button(new(xr, y, w, h), "Heuristic"))
             {
-                _parameters.Model = null;
-                _parameters.BehaviorType = BehaviorType.HeuristicOnly;
+                return;
             }
+            
+            _parameters.Model = null;
+            _parameters.BehaviorType = BehaviorType.HeuristicOnly;
         }
     }
 }

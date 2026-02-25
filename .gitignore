@@ -74,6 +74,16 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Python virtual environments.
+# Python virtual environments
 venv
 .venv
+
+# Demonstrations folder due to its size and ease to reproduce if needed
+[Dd]emonstrations
+
+# PyTorch files are typically too large.
+*.pt
+
+# Don't need the ML-Agents files in the "Assets" folder.
+/[Aa]ssets/[Mm][Ll]-[Aa]gents
+/[Aa]ssets/[Mm][Ll]-[Aa]gents.meta

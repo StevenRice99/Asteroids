@@ -388,9 +388,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  models:
-  - {fileID: 5022602860645237092, guid: 4f691abe0ff884048a1aef6d77ddd5a3, type: 3}
-  - {fileID: 5022602860645237092, guid: 8b6184613831ca54eaca482ac680d556, type: 3}
+  models: []
   asteroidPrefab: {fileID: 4394751245055917805, guid: 784457ffd007edb439542cee61bb2ca8,
     type: 3}
   bulletPrefab: {fileID: 2758569942672203454, guid: d8d55dfacb762f64cbf4c05cc402a4de,
@@ -403,7 +401,6 @@ MonoBehaviour:
   moveSpeed: 1
   turnSpeed: 0.1
   shootDelay: 0.2
-  reflexAgent: 1
   layerMask:
     serializedVersion: 2
     m_Bits: 8
