@@ -23,7 +23,7 @@ public abstract class Spawnable : MonoBehaviour
     [field: Tooltip("How much force to add.")]
     [field: Min(float.Epsilon)]
     [field: SerializeField]
-    public float Speed { get; private set; } = 50;
+    public float Speed { get; private set; } = 1;
     
     /// <summary>
     /// Reference to the player.
@@ -42,7 +42,7 @@ public abstract class Spawnable : MonoBehaviour
         Player.Spawned.Add(gameObject);
         
         // Add force once since there is no drag.
-        body.AddForce(direction * Speed);
+        body.linearVelocity = direction * Speed;
     }
     
     /// <summary>
@@ -52,5 +52,10 @@ public abstract class Spawnable : MonoBehaviour
     {
         // Clean up the reference.
         Player.Spawned.Remove(gameObject);
+    }
+
+    private void Update()
+    {
+        //Debug.Log(body.linearVelocity.magnitude);
     }
 }

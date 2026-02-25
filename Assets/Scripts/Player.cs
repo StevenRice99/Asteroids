@@ -257,11 +257,63 @@ public class Player : Agent
             return Vector2.Distance(p, new(position.x, position.y));
         }).FirstOrDefault();
         
-        // If there are no asteroids, do not turn, otherwise, turn towards the nearest.
-        discreteActions[1] = (int) (nearest == null ? Turn.None : Vector3.Cross((nearest.transform.position - raw).normalized, t.up).z < 0 ? Turn.Left : Turn.Right);
+        // Nothing to do if no aiming target.
+        if (nearest == null)
+        {
+            discreteActions[1] = (int)Turn.None;
+            discreteActions[2] = 0;
+            return;
+        }
         
-        // If currently aiming at an asteroid, shoot at it.
-        discreteActions[2] = Physics2D.Raycast(p, t.up, Mathf.Infinity, layerMask).transform == null ? 0 : 1;
+        // Calculate an intercept.
+        Vector2 targetPos = nearest.transform.position;
+        Vector2 targetVel = nearest.GetComponent<Rigidbody2D>().linearVelocity;
+        Vector2 deltaP = targetPos - p;
+        
+        // Quadratic equation coefficients.
+        float a = targetVel.sqrMagnitude - bulletPrefab.Speed * bulletPrefab.Speed;
+        float b = 2f * Vector2.Dot(deltaP, targetVel);
+        float c = deltaP.sqrMagnitude;
+        
+        // Fallback to direct line of sight.
+        Vector3 aimDirection = deltaP;
+        
+        float determinant = b * b - 4f * a * c;
+        if (determinant > 0f)
+        {
+            // Calculate both possible times.
+            float t1 = (-b + Mathf.Sqrt(determinant)) / (2f * a);
+            float t2 = (-b - Mathf.Sqrt(determinant)) / (2f * a);
+            
+            // We want the smallest positive time.
+            float timeToIntercept = -1f;
+            switch (t1)
+            {
+                case > 0f when t2 > 0f:
+                    timeToIntercept = Mathf.Min(t1, t2);
+                    break;
+                case > 0f:
+                    timeToIntercept = t1;
+                    break;
+                default:
+                {
+                    if (t2 > 0f) timeToIntercept = t2;
+                    break;
+                }
+            }
+            
+            if (timeToIntercept > 0f)
+            {
+                // Calculate the future position.
+                aimDirection = (Vector3)(targetPos + targetVel * timeToIntercept) - raw;
+            }
+        }
+        
+        // Turn towards the calculated intercept direction.
+        discreteActions[1] = (int)(Vector3.Cross(aimDirection.normalized, t.up).z < 0 ? Turn.Left : Turn.Right);
+        
+        // Shoot if the player is closely aligned with the predicted intercept path which has been set to five degrees.
+        discreteActions[2] = Vector3.Angle(t.up, aimDirection) < 5f ? 1 : 0;
     }
     
     /// <summary>
