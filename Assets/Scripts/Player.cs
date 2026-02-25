@@ -228,21 +228,24 @@ public class Player : Agent
     {
         // Implement keyboard controls.
         ActionSegment<int> discreteActions = actionsOut.DiscreteActions;
+
+        bool wKey = Keyboard.current.wKey.isPressed;
+        bool aKey = Keyboard.current.aKey.isPressed;
+        bool sKey = Keyboard.current.sKey.isPressed;
+        bool dKey = Keyboard.current.dKey.isPressed;
+        bool space = Keyboard.current.spaceKey.isPressed;
         
         // "W" to move forward, otherwise don't move.
-        discreteActions[0] = Keyboard.current.wKey.isPressed ? 1 : 0;
+        discreteActions[0] = wKey ? 1 : 0;
         
-        // "A" to move left, "D" to move right, and neither to not turn.
-        Turn turn = Keyboard.current.aKey.isPressed ? Keyboard.current.dKey.isPressed ? Turn.None : Turn.Left : Keyboard.current.dKey.isPressed ? Turn.Right : Turn.None;
-        
-        // See if we have chosen to perform a manual move.
-        if (turn != Turn.None)
+        // See if we have chosen to perform a manual move. We also check the S key, despite not being able to move backwards, as a means to "hold" our movement.
+        if (wKey || sKey || aKey || dKey || space)
         {
-            // Apply the turn.
-            discreteActions[1] = (int) turn;
+            // Apply the turn. "A" to move left, "D" to move right, and neither to not turn.
+            discreteActions[1] = (int) (aKey ? dKey ? Turn.None : Turn.Left : dKey ? Turn.Right : Turn.None);
             
             // Space to shoot, otherwise do not shoot.
-            discreteActions[2] = Keyboard.current.spaceKey.isPressed ? 1 : 0;
+            discreteActions[2] = space ? 1 : 0;
             return;
         }
         
