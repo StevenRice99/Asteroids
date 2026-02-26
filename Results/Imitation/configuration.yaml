@@ -1,6 +1,6 @@
 default_settings: null
 behaviors:
-  Player:
+  Asteroids:
     trainer_type: ppo
     hyperparameters:
       batch_size: 1024
@@ -14,6 +14,7 @@ behaviors:
       learning_rate_schedule: linear
       beta_schedule: linear
       epsilon_schedule: linear
+    checkpoint_interval: 500000
     network_settings:
       normalize: false
       hidden_units: 128
@@ -52,7 +53,7 @@ behaviors:
         demo_path: Demonstrations/
     init_path: null
     keep_checkpoints: 5
-    checkpoint_interval: 500000
+    even_checkpoints: false
     max_steps: 500000
     time_horizon: 64
     summary_freq: 50000
@@ -71,6 +72,7 @@ env_settings:
   base_port: 5005
   num_envs: 1
   num_areas: 1
+  timeout_wait: 60
   seed: -1
   max_lifetime_restarts: 10
   restarts_rate_limit_n: 1
@@ -79,10 +81,11 @@ engine_settings:
   width: 84
   height: 84
   quality_level: 5
-  time_scale: 20
+  time_scale: 20.0
   target_frame_rate: -1
   capture_frame_rate: 60
   no_graphics: false
+  no_graphics_monitor: false
 environment_parameters: null
 checkpoint_settings:
   run_id: Imitation
