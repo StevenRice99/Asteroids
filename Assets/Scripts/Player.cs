@@ -402,7 +402,7 @@ public class Player : Agent
         actionMask.SetActionEnabled(2, 0, true);
         actionMask.SetActionEnabled(2, 1, _cooldown <= 0);
     }
-
+    
     /// <summary>
     /// Awake is called when an enabled script instance is being loaded.
     /// </summary>
