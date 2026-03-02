@@ -13,21 +13,12 @@ using Debug = UnityEngine.Debug;
 public static class TrainingRunner
 {
     /// <summary>
-    /// Run imitation learning.
+    /// Run training.
     /// </summary>
-    [MenuItem("ML-Asteroids/Imitation", false, 0)]
-    public static void Imitation()
+    [MenuItem("ML-Asteroids/Train", false, 0)]
+    public static void Train()
     {
-        RunScript("Imitation.bat");
-    }
-    
-    /// <summary>
-    /// Run standard training.
-    /// </summary>
-    [MenuItem("ML-Asteroids/Standard", false, 1)]
-    public static void FineTuned()
-    {
-        RunScript("Standard.bat");
+        RunScript("Train.bat");
     }
     
     /// <summary>
@@ -36,7 +27,7 @@ public static class TrainingRunner
     [MenuItem("ML-Asteroids/TensorBoard", false, 12)]
     public static void TensorBoard()
     {
-        RunScript("Monitor.bat");
+        RunScript("TensorBoard.bat");
         Application.OpenURL("http://localhost:6006");
     }
     
