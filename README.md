@@ -69,7 +69,7 @@ The helper files have been made for Windows and you must [install uv](https://do
 
 - `Train` - Run training.
 - `TensorBoard` - This will open your browser to see the [TensorBoard](https://www.tensorflow.org/tensorboard "TensorBoard") logs of the training of all models.
-- `Install` - If you have [uv](https://docs.astral.sh/uv "uv") installed for Python, this will set up your environment for running all other commands.
+- `Install` - If you have [uv](https://docs.astral.sh/uv "uv") installed for Python, this will set up your environment for running all other commands. **Note: This assumes you have NVIDIA CUDA support. You will need to remove the `--index-url https://download.pytorch.org/whl/cu121` from the PyTorch installation line if you do not have an NVIDIA GPU with CUDA support.**
 - `Activate` - This will open a terminal in your [uv](https://docs.astral.sh/uv "uv") Python virtual environment for this project, allowing you to run other commands.
 
 ## Resources
