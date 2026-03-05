@@ -354,12 +354,31 @@ public class Player : Agent
         }
         
         // Turn towards the calculated intercept direction.
-        discreteActions[1] = (int)(Vector3.Cross(aimDirection.normalized, t.up).z < 0 ? Turn.Left : Turn.Right);
+        float angleToTarget = Vector3.Angle(t.up, aimDirection);
+        float side = Vector3.Cross(aimDirection.normalized, t.up).z;
+        Turn desiredTurn = side < 0 ? Turn.Left : Turn.Right;
         
-        // If it's a threat and we're not yet facing it, check if we'll collide before we can face it.
+        switch (angleToTarget)
+        {
+            // If we're close to the target, use angular velocity to damp the rotation and prevent overshooting.
+            case < 7.5f when Mathf.Abs(body.angularVelocity) > 10f:
+            {
+                bool rotatingTowardsTarget = (side < 0 && body.angularVelocity > 0) || (side > 0 && body.angularVelocity < 0);
+                discreteActions[1] = (int)(rotatingTowardsTarget ? (desiredTurn == Turn.Left ? Turn.Right : Turn.Left) : Turn.None);
+                break;
+            }
+            case < 1f:
+                discreteActions[1] = (int)Turn.None;
+                break;
+            default:
+                discreteActions[1] = (int)desiredTurn;
+                break;
+        }
+        
+        // If it's a threat, and we're not yet facing it, check if we'll collide before we can face it.
         if (threatInfo is { IsThreat: true } && threatInfo.TimeToCollision < 0.75f)
         {
-            float angleToTarget = Vector3.Angle(t.up, aimDirection);
+            angleToTarget = Vector3.Angle(t.up, aimDirection);
             if (angleToTarget > 30f)
             {
                 discreteActions[0] = 1;
