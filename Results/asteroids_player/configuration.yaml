@@ -50,7 +50,7 @@ behaviors:
         encoding_size: 128
       gail:
         gamma: 0.99
-        strength: 0.02
+        strength: 0.01
         network_settings:
           normalize: false
           hidden_units: 128
@@ -75,7 +75,7 @@ behaviors:
     behavioral_cloning:
       demo_path: Demonstrations/
       steps: 1000000
-      strength: 0.02
+      strength: 0.01
       samples_per_update: 0
       num_epoch: 3
       batch_size: 1024

@@ -2,103 +2,103 @@
     "AsteroidsPlayer": {
         "checkpoints": [
             {
-                "steps": 199983,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-199983.onnx",
-                "reward": 3.211111080315378,
-                "creation_time": 1772650409.174055,
+                "steps": 199874,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-199874.onnx",
+                "reward": -0.3181818662719293,
+                "creation_time": 1772726988.8349316,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-199983.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-199874.pt"
                 ]
             },
             {
-                "steps": 299930,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-299930.onnx",
-                "reward": 2.7249999456107616,
-                "creation_time": 1772651252.22898,
+                "steps": 299939,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-299939.onnx",
+                "reward": 0.9374999506399035,
+                "creation_time": 1772727972.2025952,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-299930.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-299939.pt"
                 ]
             },
             {
-                "steps": 399924,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-399924.onnx",
-                "reward": 2.1799999445676805,
-                "creation_time": 1772652110.2373507,
+                "steps": 399968,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-399968.onnx",
+                "reward": 2.042857041316373,
+                "creation_time": 1772728922.3425515,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-399924.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-399968.pt"
                 ]
             },
             {
-                "steps": 499882,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-499882.onnx",
-                "reward": 1.019999948143959,
-                "creation_time": 1772652937.383231,
+                "steps": 499964,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-499964.onnx",
+                "reward": 3.019999872148037,
+                "creation_time": 1772729878.7765737,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-499882.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-499964.pt"
                 ]
             },
             {
-                "steps": 599925,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-599925.onnx",
-                "reward": 1.2666666234532993,
-                "creation_time": 1772653822.3785439,
+                "steps": 599901,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-599901.onnx",
+                "reward": 6.649999804794788,
+                "creation_time": 1772730822.3149722,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-599925.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-599901.pt"
                 ]
             },
             {
-                "steps": 699902,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-699902.onnx",
-                "reward": 8.099999770522118,
-                "creation_time": 1772654680.7460773,
+                "steps": 699951,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-699951.onnx",
+                "reward": -1.2999999821186066,
+                "creation_time": 1772731776.59704,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-699902.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-699951.pt"
                 ]
             },
             {
-                "steps": 799988,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-799988.onnx",
-                "reward": 3.46666661153237,
-                "creation_time": 1772655572.230102,
+                "steps": 799890,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-799890.onnx",
+                "reward": 2.454545346850699,
+                "creation_time": 1772732717.52152,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-799988.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-799890.pt"
                 ]
             },
             {
-                "steps": 899960,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-899960.onnx",
-                "reward": 6.088888756102985,
-                "creation_time": 1772656450.340221,
+                "steps": 899893,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-899893.onnx",
+                "reward": 3.0090908394618467,
+                "creation_time": 1772733669.4399452,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-899960.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-899893.pt"
                 ]
             },
             {
-                "steps": 999971,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-999971.onnx",
-                "reward": 3.5624999348074198,
-                "creation_time": 1772657257.9939892,
+                "steps": 999983,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-999983.onnx",
+                "reward": 2.977777717841996,
+                "creation_time": 1772734639.4720914,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-999971.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-999983.pt"
                 ]
             },
             {
-                "steps": 1000001,
-                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-1000001.onnx",
-                "reward": 4.422222135795487,
-                "creation_time": 1772657258.0883145,
+                "steps": 1000111,
+                "file_path": "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-1000111.onnx",
+                "reward": 2.977777717841996,
+                "creation_time": 1772734639.5670836,
                 "auxillary_file_paths": [
-                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-1000001.pt"
+                    "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-1000111.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 1000001,
+            "steps": 1000111,
             "file_path": "Results\\asteroids_player\\AsteroidsPlayer.onnx",
-            "reward": 4.422222135795487,
-            "creation_time": 1772657258.0883145,
+            "reward": 2.977777717841996,
+            "creation_time": 1772734639.5670836,
             "auxillary_file_paths": [
-                "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-1000001.pt"
+                "Results\\asteroids_player\\AsteroidsPlayer\\AsteroidsPlayer-1000111.pt"
             ]
         }
     },
