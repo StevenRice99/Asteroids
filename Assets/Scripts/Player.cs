@@ -256,7 +256,7 @@ public class Player : Agent
         float playerRadius = playerCol != null ? playerCol.bounds.extents.magnitude : t.localScale.x / 2f;
         
         // Find the nearest asteroid, prioritizing those on a collision course.
-        GameObject nearest = Spawned
+        var threatInfo = Spawned
             .Where(s => s.CompareTag("Asteroid"))
             .Select(s =>
             {
@@ -297,8 +297,9 @@ public class Player : Agent
             .OrderByDescending(x => x.IsThreat) 
             .ThenBy(x => x.TimeToCollision)
             .ThenBy(x => x.Distance)
-            .Select(x => x.GameObject)
             .FirstOrDefault();
+        
+        GameObject nearest = threatInfo?.GameObject;
         
         // Nothing to do if no aiming target.
         if (nearest == null)
@@ -354,6 +355,16 @@ public class Player : Agent
         
         // Turn towards the calculated intercept direction.
         discreteActions[1] = (int)(Vector3.Cross(aimDirection.normalized, t.up).z < 0 ? Turn.Left : Turn.Right);
+        
+        // If it's a threat and we're not yet facing it, check if we'll collide before we can face it.
+        if (threatInfo is { IsThreat: true } && threatInfo.TimeToCollision < 0.75f)
+        {
+            float angleToTarget = Vector3.Angle(t.up, aimDirection);
+            if (angleToTarget > 30f)
+            {
+                discreteActions[0] = 1;
+            }
+        }
         
         // Shoot if any asteroid is closely aligned with its predicted intercept path.
         float bulletSpeed = bulletPrefab.Speed;
