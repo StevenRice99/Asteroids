@@ -282,11 +282,20 @@ public class Player : Agent
                 float asteroidRadius = asteroidCol != null ? asteroidCol.bounds.extents.magnitude : s.transform.localScale.x / 2f;
                 
                 // Flag as threat if it's moving towards us AND the trajectory intersects our combined bounding radii.
-                bool isThreat = movingTowards && distanceToTrajectory < (playerRadius + asteroidRadius);
-                return new { GameObject = s, IsThreat = isThreat, Distance = distanceToPlayer };
+                bool isThreat = movingTowards && distanceToTrajectory < playerRadius + asteroidRadius;
+                
+                // Calculate time to collision for threats.
+                float timeToCollision = float.MaxValue;
+                if (isThreat && aVel.sqrMagnitude > 0.001f)
+                {
+                    timeToCollision = dot / aVel.sqrMagnitude;
+                }
+                
+                return new { GameObject = s, IsThreat = isThreat, Distance = distanceToPlayer, TimeToCollision = timeToCollision };
             })
-            // Order by True (threats) first, then sort by distance
+            // Order by threats first, then sort by time to collision, then distance.
             .OrderByDescending(x => x.IsThreat) 
+            .ThenBy(x => x.TimeToCollision)
             .ThenBy(x => x.Distance)
             .Select(x => x.GameObject)
             .FirstOrDefault();
@@ -648,17 +657,28 @@ public class Player : Agent
         const float x = 10;
         const float w = 175;
         const float h = 25;
+        float y = x;
         
         // Display the score in the top left.
-        GUI.Label(new(x, x, w, h), $"Score = {GetCumulativeReward()}");
+        GUI.Label(new(x, y, w, h), $"Score = {GetCumulativeReward()}");
+        
+        // Display the current time step.
+        y += h + x;
+        GUI.Label(new(x, y, w, h), $"Steps = {StepCount}");
         
         if (models.Length < 1 || (Academy.IsInitialized && Academy.Instance.IsCommunicatorOn))
         {
             return;
         }
         
+        // Allow to reset.
+        y += h + x;
+        if (GUI.Button(new(x, y, w, h), "Reset"))
+        {
+            EndEpisode();
+        }
+        
         float xr = Screen.width - x - w;
-        float y = x;
         
         // Handle based on if we are currently using a model or not.
         bool heuristic = _parameters.IsInHeuristicMode();
