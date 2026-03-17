@@ -16,7 +16,7 @@ Teaching an agent to play [Asteroids](https://en.wikipedia.org/wiki/Asteroids_(v
 
 ## Purpose
 
-The purpose is this project is for use as a learning resources for [Unity ML-Agents](https://docs.unity3d.com/Packages/com.unity.ml-agents@latest "Unity ML-Agents"), highlighting how different methods can be applied to try and overcome a classic game.
+The purpose is this project is for use as a learning resource for [Unity ML-Agents](https://docs.unity3d.com/Packages/com.unity.ml-agents@latest "Unity ML-Agents"), highlighting how different methods can be applied to try and overcome a classic game.
 
 ## Game Overview
 
